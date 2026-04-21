@@ -1,0 +1,80 @@
+<template>
+  <div>
+    <h2 class="page-title">商家管理</h2>
+    <div class="card">
+      <div class="filter-bar">
+        <el-input v-model="query.keyword" placeholder="搜索商家" style="width:200px" clearable />
+        <button class="btn btn-primary" style="margin-left:12px" @click="load">搜索</button>
+      </div>
+      <el-table :data="list" stripe v-loading="loading" class="modern-table">
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="username" label="用户名" width="120" />
+        <el-table-column prop="nickname" label="昵称" width="120" />
+        <el-table-column prop="phone" label="手机号" width="140" />
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <span class="tag" :class="row.status === 1 ? 'tag-success' : 'tag-danger'">
+              {{ row.status === 1 ? '正常' : '禁用' }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column label="操作" width="200" fixed="right">
+          <template #default="{ row }">
+            <button class="btn btn-sm" :class="row.status === 1 ? 'btn-outline' : 'btn-outline-success'" @click="toggleStatus(row)">
+              {{ row.status === 1 ? '禁用' : '启用' }}
+            </button>
+            <button class="btn btn-sm btn-outline-warning" @click="handleResetPwd(row)">重置</button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { listUsers, updateUserStatus, resetPassword } from '../../api/admin'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+const list = ref([])
+const loading = ref(false)
+const query = reactive({ keyword: '' })
+
+async function load() {
+  loading.value = true
+  try {
+    const res = await listUsers({ role: 1, ...query, page: 1, size: 50 })
+    list.value = res.data || []
+  } finally {
+    loading.value = false
+  }
+}
+
+async function toggleStatus(row) {
+  await updateUserStatus(row.id, row.status === 1 ? 0 : 1)
+  ElMessage.success('操作成功')
+  load()
+}
+
+async function handleResetPwd(row) {
+  try {
+    await ElMessageBox.confirm(`确认重置用户 ${row.username} 的密码？`, '提示', { type: 'warning' })
+    await resetPassword(row.id)
+    ElMessage.success('密码已重置为 123456')
+  } catch {}
+}
+
+onMounted(load)
+</script>
+
+<style scoped>
+.filter-bar { display: flex; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; align-items: center; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-outline { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+.btn-outline:hover { background: var(--danger); color: white; }
+.btn-outline-success { background: transparent; border: 1px solid var(--success); color: var(--success); }
+.btn-outline-success:hover { background: var(--success); color: white; }
+.btn-outline-warning { background: transparent; border: 1px solid var(--warning); color: var(--warning); }
+.btn-outline-warning:hover { background: var(--warning); color: white; }
+</style>

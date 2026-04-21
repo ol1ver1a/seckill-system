@@ -1,0 +1,1 @@
+import{A as e}from"./index-CqRLF6I0.js";function n(t){return e.get("/notice/list",{params:t})}function o(){return e.get("/notice/published")}function u(t){return e.post("/notice",t)}function c(t){return e.put("/notice",t)}function s(t){return e.delete(`/notice/${t}`)}export{n as a,u as b,s as d,o as l,c as u};

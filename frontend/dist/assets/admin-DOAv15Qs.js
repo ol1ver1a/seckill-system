@@ -1,0 +1,1 @@
+import{A as r}from"./index-CqRLF6I0.js";function u(s){return r.get("/admin/users",{params:s})}function a(s,t){return r.put(`/admin/user/${s}/status`,null,{params:{status:t}})}function n(s){return r.put(`/admin/user/${s}/reset-password`)}export{u as l,n as r,a as u};
